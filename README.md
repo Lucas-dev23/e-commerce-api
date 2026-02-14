@@ -17,8 +17,8 @@ Este projeto foi desenvolvido como parte do meu portfólio para demonstrar habil
 - Maven
 - PostgreSQL
 - Swagger / OpenAPI
-- Estrutura DTO / Service / Controller / Repository
-- Validações customizadas
+- Bean validation
+- Lombok
 
 ---
 
