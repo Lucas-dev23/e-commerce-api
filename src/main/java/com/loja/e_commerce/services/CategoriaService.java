@@ -6,10 +6,12 @@ import com.loja.e_commerce.exceptions.ConflictException;
 import com.loja.e_commerce.exceptions.ResourceNotFoundException;
 import com.loja.e_commerce.models.Categoria;
 import com.loja.e_commerce.repositories.CategoriaRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class CategoriaService {
 
@@ -28,6 +30,9 @@ public class CategoriaService {
         categoria.setAtivo(dto.getAtivo());
 
         repository.save(categoria);
+
+        log.info("Categoria criada: id={}", categoria.getId());
+
         return toDTO(categoria);
     }
 
@@ -36,6 +41,7 @@ public class CategoriaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
         if (repository.existsByNomeIgnoreCaseAndIdNot(dto.getNome(), id)) {
+            log.warn("Tentativa de criar categoria existente: id={}", categoria.getId());
             throw new ConflictException("Categoria já existe");
         }
 
@@ -43,16 +49,23 @@ public class CategoriaService {
         categoria.setAtivo(dto.getAtivo());
 
         Categoria categoriaAtualizada = repository.save(categoria);
+
+        log.info("Categoria atualizada: id={}", categoriaAtualizada.getId());
+
         return toDTO(categoriaAtualizada);
     }
 
     public List<CategoriaResponseDTO> buscar() {
+        log.debug("Listando categorias");
+
         List<Categoria> categorias = repository.findAll();
 
         return categorias.stream().map(this::toDTO).toList();
     }
 
     public CategoriaResponseDTO buscarPorId(Long id) {
+        log.debug("Buscando categoria por id={}", id);
+
         Categoria categoria = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 

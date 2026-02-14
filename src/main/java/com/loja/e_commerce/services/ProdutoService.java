@@ -13,6 +13,7 @@ import com.loja.e_commerce.models.Produto;
 import com.loja.e_commerce.repositories.CategoriaRepository;
 import com.loja.e_commerce.repositories.ProdutoRepository;
 import com.loja.e_commerce.repositories.specification.ProdutoSpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @Service
 public class ProdutoService {
 
@@ -42,13 +44,15 @@ public class ProdutoService {
         this.imagemStorage = imagemStorage;
     }
 
-    @Transactional //Se algo quebrar não salva
+    @Transactional //Se algo quebrar não salva (Rollback)
     public ProdutoResponseDTO criar(ProdutoRequestDTO dto) {
 
         Categoria categoria = categoriaRepository.findById(dto.getCategoriaId())
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
         if (!categoria.getAtivo()) {
+            log.warn("Tentativa de criar produto em categoria inativa: categoriaId={}",
+                    dto.getCategoriaId());
             throw new BadRequestException("Categoria inativa");
         }
 
@@ -62,10 +66,13 @@ public class ProdutoService {
 
         Produto produtoSalvo = produtoRepository.save(produto);
 
+        log.info("Produto criado: nome={}, categoriaId={}",
+                produtoSalvo.getNome(), produtoSalvo.getCategoria().getId());
+
         return mapper.toResponse(produtoSalvo);
     }
 
-    @Transactional //Se algo quebrar não salva
+    @Transactional //Se algo quebrar não salva (Rollback)
     public ProdutoResponseDTO atualizar(Long id, ProdutoRequestDTO dto) {
 
         Produto produto = produtoRepository.findById(id)
@@ -75,6 +82,8 @@ public class ProdutoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
         if (!categoria.getAtivo()) {
+            log.warn("Tentativa de atualizar produto em categoria inativa: categoriaId={}",
+                    dto.getCategoriaId());
             throw new BadRequestException("Categoria inativa");
         }
 
@@ -86,10 +95,15 @@ public class ProdutoService {
         mapper.toEntity(dto, categoria);
 
         Produto produtoAtualizado = produtoRepository.save(produto);
+
+        log.info("Produto atualizado: id={}", produtoAtualizado.getId());
+
         return mapper.toResponse(produtoAtualizado);
     }
 
     public PageResponseDTO<ProdutoResponseDTO> buscar(ProdutoFiltrosDTO dto) {
+        log.debug("Buscando produtos com filtros: {}", dto);
+
         validarFiltros(dto);
 
         //Em sql: LIMIT size OFFSET (page * size)
@@ -109,6 +123,8 @@ public class ProdutoService {
     }
 
     public ProdutoResponseDTO buscarPorId(Long id) {
+        log.debug("Busca de produto por id={}", id);
+
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
 
@@ -128,6 +144,8 @@ public class ProdutoService {
             imagemStorage.deletar(produto.getImagemPath());
         }
 
+        log.warn("Produto deletado: id={}", produto.getId());
+
         return "Produto excluído com sucesso";
     }
 
@@ -136,6 +154,7 @@ public class ProdutoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
 
         if (!produto.getAtivo()) {
+            log.warn("Tentativa de upload em produto inativo: id={}", produto.getId());
             throw new BadRequestException("Produto inativo");
         }
 
@@ -145,12 +164,16 @@ public class ProdutoService {
             produto.setImagemPath(imagemURl);
             produtoRepository.save(produto);
 
+            log.info("Imagem salva para produto id={}", idProduto);
+
             return "Imagem salva com sucesso";
 
         } catch (Exception e) {
 
             // Evita ter uma imagem sem um produto associado a ela caso não salve o caminho no banco
             imagemStorage.deletar(imagemURl);
+
+            log.error("Erro ao salvar imagem do produto {}", idProduto, e);
 
             throw e;
         }

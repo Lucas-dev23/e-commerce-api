@@ -1,6 +1,7 @@
 package com.loja.e_commerce.services;
 
 import com.loja.e_commerce.exceptions.BadRequestException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ImagemStorageService {
 
@@ -28,22 +30,27 @@ public class ImagemStorageService {
             //Converte a String do appProperties para Path
             Path diretorio = Paths.get(uploadDir);
 
-           // cria o diretório se não existir e não lança erro se já existir
+            // cria o diretório se não existir e não lança erro se já existir
             Files.createDirectories(diretorio);
 
             // remove imagem antiga se existir
             if (imagemAntiga != null) {
                 deletar(imagemAntiga);
+                log.warn("Imagem antiga removida: {}", imagemAntiga);
             }
 
+            // Cria novo path diretório + novo nome imagem
             Path caminhoCompleto = diretorio.resolve(novoNome);
 
             // salva a imagem no disco
             file.transferTo(caminhoCompleto);
 
+            log.info("Imagem salva: {}", novoNome);
+
             return novoNome;
 
         } catch (IOException e) {
+            log.error("Erro ao salvar a imagem: {}", novoNome, e);
             throw new RuntimeException("Erro ao salvar imagem", e);
         }
     }
@@ -52,8 +59,9 @@ public class ImagemStorageService {
         try {
             Path caminho = Paths.get(uploadDir).resolve(nomeArquivo);
             Files.deleteIfExists(caminho);
-
+            log.warn("Imagem removida: {}", nomeArquivo);
         } catch (IOException e) {
+            log.error("Erro ao deletar a imagem: {}", nomeArquivo, e);
             throw new RuntimeException("Erro ao deletar imagem", e);
         }
     }
