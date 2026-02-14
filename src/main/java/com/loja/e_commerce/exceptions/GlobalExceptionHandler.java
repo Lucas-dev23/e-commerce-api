@@ -1,5 +1,6 @@
 package com.loja.e_commerce.exceptions;
 
+import com.loja.e_commerce.dtos.ApiErrorDTO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,54 +16,91 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiErrorDTO> handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
 
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> validation = new HashMap<>();
 
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
+        ex.getBindingResult().getFieldErrors()
+                .forEach(err -> validation.put(err.getField(), err.getDefaultMessage()));
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(errors);
+        return build(
+                HttpStatus.BAD_REQUEST,
+                "Erro de validação",
+                request.getRequestURI(),
+                validation
+        );
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNotFound(
-            ResourceNotFoundException ex) {
+    public ResponseEntity<ApiErrorDTO> handleNotFound(
+            ResourceNotFoundException ex,
+            HttpServletRequest request) {
 
-        Map<String, String> error = Map.of("error", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return build(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage(),
+                request.getRequestURI(),
+                null
+        );
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<Map<String, String>> handleConflict(
+    public ResponseEntity<ApiErrorDTO> handleConflict(
             ConflictException ex,
             HttpServletRequest request) {
 
-        Map<String, String> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        body.put("path", request.getRequestURI());
-
-        return ResponseEntity
-                .status(HttpStatus.CONFLICT)
-                .body(body);
+        return build(
+                HttpStatus.CONFLICT,
+                ex.getMessage(),
+                request.getRequestURI(),
+                null
+        );
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, String>> handleBadRequest(
+    public ResponseEntity<ApiErrorDTO> handleBadRequest(
             BadRequestException ex,
             HttpServletRequest request) {
 
-        Map<String, String> body = new HashMap<>();
-        body.put("message", ex.getMessage());
-        body.put("path", request.getRequestURI());
+        return build(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                request.getRequestURI(),
+                null
+        );
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(body);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorDTO> handleGeneric(
+            Exception ex,
+            HttpServletRequest request) {
+
+        return build(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Erro interno inesperado",
+                request.getRequestURI(),
+                null
+        );
+    }
+
+    private ResponseEntity<ApiErrorDTO> build(
+            HttpStatus status,
+            String message,
+            String path,
+            Map<String, String> validation) {
+
+        ApiErrorDTO error = new ApiErrorDTO(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                path,
+                validation
+        );
+
+        return ResponseEntity.status(status).body(error);
     }
 }
 
