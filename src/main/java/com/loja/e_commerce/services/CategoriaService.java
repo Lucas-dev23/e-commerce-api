@@ -31,7 +31,7 @@ public class CategoriaService {
 
         repository.save(categoria);
 
-        log.info("Categoria criada: id={}", categoria.getId());
+        log.info("Categoria criada: nome={}", categoria.getNome());
 
         return toDTO(categoria);
     }
@@ -41,7 +41,7 @@ public class CategoriaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
         if (repository.existsByNomeIgnoreCaseAndIdNot(dto.getNome(), id)) {
-            log.warn("Tentativa de criar categoria existente: id={}", categoria.getId());
+            log.warn("Tentativa de criar categoria existente: nome={}", categoria.getNome());
             throw new ConflictException("Categoria já existe");
         }
 
@@ -50,13 +50,13 @@ public class CategoriaService {
 
         Categoria categoriaAtualizada = repository.save(categoria);
 
-        log.info("Categoria atualizada: id={}", categoriaAtualizada.getId());
+        log.info("Categoria atualizada: nome={}", categoriaAtualizada.getNome());
 
         return toDTO(categoriaAtualizada);
     }
 
     public List<CategoriaResponseDTO> buscar() {
-        log.debug("Listando categorias");
+        log.info("Listando categorias");
 
         List<Categoria> categorias = repository.findAll();
 
@@ -64,7 +64,7 @@ public class CategoriaService {
     }
 
     public CategoriaResponseDTO buscarPorId(Long id) {
-        log.debug("Buscando categoria por id={}", id);
+        log.info("Buscando categoria por id={}", id);
 
         Categoria categoria = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));

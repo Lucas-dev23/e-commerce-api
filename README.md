@@ -13,6 +13,7 @@ Este projeto foi desenvolvido como parte do meu portfólio para demonstrar habil
 - Spring Web
 - Spring Data JPA
 - Spring Data JPA Specifications
+- JUnit Test
 - Hibernate
 - Maven
 - PostgreSQL
@@ -43,6 +44,8 @@ src/
 │       ├── templates/
 │       ├── application-example.properties
 ├── test/
+│   └── java/com/loja/e_commerce
+│       ├── services
 uploads/
 pom.xml
 ```
@@ -63,7 +66,7 @@ cp src/main/resources/application-example.properties src/main/resources/applicat
 
 ## 🗄️ Banco de dados
 
-O projeto utiliza banco relacional (ex: PostgreSQL).
+O projeto utiliza banco relacional (PostgreSQL).
 
 ### 1. Criar o banco
 
@@ -201,9 +204,9 @@ A API utiliza exceptions customizadas:
 
 ## 🧪 Testes
 
-Ainda não implementados.
+Testes unitários em desenvolvimento.
 
-Planejado para versões futuras.
+Planejado: cobertura de services com Mockito, controllers e repositories.
 
 ---
 
@@ -226,6 +229,7 @@ Demonstrar:
 - validações de negócio
 - paginação e filtros
 - upload de arquivos
+- testes unitários (Mockito)
 - documentação Swagger
 - boas práticas com Spring Boot
 

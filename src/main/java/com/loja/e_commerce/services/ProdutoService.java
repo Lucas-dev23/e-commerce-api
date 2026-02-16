@@ -102,7 +102,7 @@ public class ProdutoService {
     }
 
     public PageResponseDTO<ProdutoResponseDTO> buscar(ProdutoFiltrosDTO dto) {
-        log.debug("Buscando produtos com filtros: {}", dto);
+        log.info("Buscando produtos com filtros: {}", dto);
 
         validarFiltros(dto);
 
@@ -123,7 +123,7 @@ public class ProdutoService {
     }
 
     public ProdutoResponseDTO buscarPorId(Long id) {
-        log.debug("Busca de produto por id={}", id);
+        log.info("Busca de produto por id={}", id);
 
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Produto não encontrado"));
