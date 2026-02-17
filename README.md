@@ -45,7 +45,9 @@ src/
 │       ├── application-example.properties
 ├── test/
 │   └── java/com/loja/e_commerce
+│       ├── controllers
 │       ├── services
+│       ├── repositories
 uploads/
 pom.xml
 ```
