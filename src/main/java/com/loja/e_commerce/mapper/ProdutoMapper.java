@@ -24,6 +24,15 @@ public class ProdutoMapper {
         return produto;
     }
 
+    public void toUpdateEntity(Produto produto, ProdutoRequestDTO dto, Categoria categoria) {
+        produto.setNome(dto.getNome());
+        produto.setDescricao(dto.getDescricao());
+        produto.setPreco(dto.getPreco());
+        produto.setEstoque(dto.getEstoque());
+        produto.setAtivo(dto.getAtivo());
+        produto.setCategoria(categoria);
+    }
+
     public ProdutoResponseDTO toResponse(Produto produto) {
         return new ProdutoResponseDTO(
                 produto.getId(),

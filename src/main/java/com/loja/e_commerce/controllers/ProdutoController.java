@@ -40,7 +40,7 @@ public class ProdutoController implements ProdutoDoc {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
-    @PostMapping("/{idProduto}")
+    @PostMapping("/{idProduto}/imagem")
     @Override
     public ResponseEntity<String> uploadImagem(@PathVariable Long idProduto, @RequestParam MultipartFile imagem) {
         return ResponseEntity.status(HttpStatus.CREATED)

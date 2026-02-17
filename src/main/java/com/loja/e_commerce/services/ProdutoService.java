@@ -92,7 +92,8 @@ public class ProdutoService {
             throw new ConflictException("Produto já existe nessa categoria");
         }
 
-        mapper.toEntity(dto, categoria);
+        //Altera a referência produto trazida do repositório
+        mapper.toUpdateEntity(produto, dto, categoria);
 
         Produto produtoAtualizado = produtoRepository.save(produto);
 
@@ -131,6 +132,7 @@ public class ProdutoService {
         return mapper.toResponse(produto);
     }
 
+
     public String deletar(Long id) {
 
         Produto produto = produtoRepository.findById(id)
@@ -142,6 +144,8 @@ public class ProdutoService {
 
         if (imagemURL != null) {
             imagemStorage.deletar(produto.getImagemPath());
+            log.warn("Imagem deletada com sucesso: imagemURL={}, do produto={}",
+                    imagemURL, produto.getNome());
         }
 
         log.warn("Produto deletado: id={}", produto.getId());
@@ -169,7 +173,6 @@ public class ProdutoService {
             return "Imagem salva com sucesso";
 
         } catch (Exception e) {
-
             // Evita ter uma imagem sem um produto associado a ela caso não salve o caminho no banco
             imagemStorage.deletar(imagemURl);
 

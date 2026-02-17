@@ -153,6 +153,26 @@ public class ProdutoServiceTest {
 
         // Nunca chame o save
         verify(produtoRepository, never()).save(any());
+        verify(mapper, never()).toEntity(any(), any());
+    }
+
+    @Test
+    void criarProdutoComCategoriaInativa() {
+        ProdutoRequestDTO dto = criarDTO();
+
+        Categoria categoriaInativa = criarCategoria();
+        categoriaInativa.setAtivo(false);
+
+        when(categoriaRepository.findById(dto.getCategoriaId()))
+                .thenReturn(Optional.of(categoriaInativa));
+
+        // Esperado que lance exceção
+        assertThrows(BadRequestException.class,
+                () -> produtoService.criar(dto));
+
+        // Nunca chame o save
+        verify(produtoRepository, never()).save(any());
+        verify(mapper, never()).toEntity(any(), any());
     }
 
     @Test
@@ -205,7 +225,7 @@ public class ProdutoServiceTest {
         assertEquals(resultado, response);
 
         verify(produtoRepository).save(produto);
-        verify(mapper).toEntity(dto, categoria);
+        verify(mapper).toUpdateEntity(produto, dto, categoria);
     }
 
     @Test
@@ -328,6 +348,23 @@ public class ProdutoServiceTest {
         produtoService.salvarImagem(produtoId, arquivo);
 
         verify(produtoRepository).save(produto);
+    }
+
+    @Test
+    void salvarImagemProdutoInativo() {
+        Produto produto = criarProduto();
+        produto.setAtivo(false);
+
+        MultipartFile arquivo = mock(MultipartFile.class);
+
+        when(produtoRepository.findById(produtoId))
+                .thenReturn(Optional.of(produto));
+
+        assertThrows(BadRequestException.class,
+                () -> produtoService.salvarImagem(produtoId, arquivo));
+
+        verify(imagemStorage, never()).salvar(any(), any());
+        verify(produtoRepository, never()).save(any());
     }
 
     @Test
