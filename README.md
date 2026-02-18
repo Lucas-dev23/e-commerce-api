@@ -46,8 +46,8 @@ src/
 ├── test/
 │   └── java/com/loja/e_commerce
 │       ├── controllers
-│       ├── services
 │       ├── repositories
+│       ├── services
 uploads/
 pom.xml
 ```

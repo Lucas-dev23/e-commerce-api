@@ -4,6 +4,7 @@ import com.loja.e_commerce.dtos.categoria.CategoriaRequestDTO;
 import com.loja.e_commerce.dtos.categoria.CategoriaResponseDTO;
 import com.loja.e_commerce.exceptions.ConflictException;
 import com.loja.e_commerce.exceptions.ResourceNotFoundException;
+import com.loja.e_commerce.mappers.CategoriaMapper;
 import com.loja.e_commerce.models.Categoria;
 import com.loja.e_commerce.repositories.CategoriaRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -16,24 +17,24 @@ import java.util.List;
 public class CategoriaService {
 
     private final CategoriaRepository repository;
+    private final CategoriaMapper mapper;
 
-    public CategoriaService(CategoriaRepository repository) {
+    public CategoriaService(CategoriaRepository repository, CategoriaMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     public CategoriaResponseDTO criar(CategoriaRequestDTO dto) {
         if (repository.existsByNomeIgnoreCase(dto.getNome()))
             throw new ConflictException("Categoria já existe");
 
-        Categoria categoria = new Categoria();
-        categoria.setNome(dto.getNome());
-        categoria.setAtivo(dto.getAtivo());
+        Categoria categoria = mapper.toEntity(dto);
 
         repository.save(categoria);
 
         log.info("Categoria criada: nome={}", categoria.getNome());
 
-        return toDTO(categoria);
+        return mapper.toResponse(categoria);
     }
 
     public CategoriaResponseDTO atualizar(Long id, CategoriaRequestDTO dto) {
@@ -45,14 +46,13 @@ public class CategoriaService {
             throw new ConflictException("Categoria já existe");
         }
 
-        categoria.setNome(dto.getNome());
-        categoria.setAtivo(dto.getAtivo());
+        mapper.toUpdateEntity(categoria, dto);
 
         Categoria categoriaAtualizada = repository.save(categoria);
 
         log.info("Categoria atualizada: nome={}", categoriaAtualizada.getNome());
 
-        return toDTO(categoriaAtualizada);
+        return mapper.toResponse(categoriaAtualizada);
     }
 
     public List<CategoriaResponseDTO> buscar() {
@@ -60,7 +60,9 @@ public class CategoriaService {
 
         List<Categoria> categorias = repository.findAll();
 
-        return categorias.stream().map(this::toDTO).toList();
+        return categorias.stream()
+                .map(mapper::toResponse)
+                .toList();
     }
 
     public CategoriaResponseDTO buscarPorId(Long id) {
@@ -69,14 +71,6 @@ public class CategoriaService {
         Categoria categoria = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
-        return toDTO(categoria);
-    }
-
-    private CategoriaResponseDTO toDTO(Categoria categoria) {
-        return new CategoriaResponseDTO(
-                categoria.getId(),
-                categoria.getNome(),
-                categoria.getAtivo()
-        );
+        return mapper.toResponse(categoria);
     }
 }

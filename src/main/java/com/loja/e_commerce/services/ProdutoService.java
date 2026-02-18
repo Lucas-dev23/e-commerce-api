@@ -7,7 +7,7 @@ import com.loja.e_commerce.dtos.produto.ProdutoResponseDTO;
 import com.loja.e_commerce.exceptions.BadRequestException;
 import com.loja.e_commerce.exceptions.ConflictException;
 import com.loja.e_commerce.exceptions.ResourceNotFoundException;
-import com.loja.e_commerce.mapper.ProdutoMapper;
+import com.loja.e_commerce.mappers.ProdutoMapper;
 import com.loja.e_commerce.models.Categoria;
 import com.loja.e_commerce.models.Produto;
 import com.loja.e_commerce.repositories.CategoriaRepository;

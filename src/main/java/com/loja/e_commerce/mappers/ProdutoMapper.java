@@ -1,4 +1,4 @@
-package com.loja.e_commerce.mapper;
+package com.loja.e_commerce.mappers;
 
 import com.loja.e_commerce.dtos.PageResponseDTO;
 import com.loja.e_commerce.dtos.produto.ProdutoRequestDTO;
