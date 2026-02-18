@@ -25,8 +25,10 @@ public class CategoriaService {
     }
 
     public CategoriaResponseDTO criar(CategoriaRequestDTO dto) {
-        if (repository.existsByNomeIgnoreCase(dto.getNome()))
+        if (repository.existsByNomeIgnoreCase(dto.getNome())) {
+            log.warn("Tentativa de criar categoria existente: nome={}", dto.getNome());
             throw new ConflictException("Categoria já existe");
+        }
 
         Categoria categoria = mapper.toEntity(dto);
 
@@ -42,7 +44,7 @@ public class CategoriaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada"));
 
         if (repository.existsByNomeIgnoreCaseAndIdNot(dto.getNome(), id)) {
-            log.warn("Tentativa de criar categoria existente: nome={}", categoria.getNome());
+            log.warn("Tentativa de atualizar categoria existente: nome={}", categoria.getNome());
             throw new ConflictException("Categoria já existe");
         }
 
